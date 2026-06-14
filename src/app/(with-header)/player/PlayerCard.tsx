@@ -8,14 +8,16 @@ import TrackCover from '@/components/track-card/TrackCover'
 
 import { usePlayerStore } from '@/store/playerStore'
 import { useEffect } from 'react'
-import { TrackType } from '../../../@types/track'
+import { TrackType } from '../../../../@types/track'
 import { useShallow } from 'zustand/shallow'
+import Link from 'next/link'
+import { PiIcon } from 'lucide-react'
 
 type PlayerProps = {
     initialTrack?: TrackType
 }
 
-export default function PagePlayer({ initialTrack }: PlayerProps) {
+export default function PlayerCard({ initialTrack }: PlayerProps) {
     const { currentTrack, setCurrentTrack } = usePlayerStore(
         useShallow((s) => ({
             currentTrack: s.currentTrack,
@@ -55,6 +57,9 @@ export default function PagePlayer({ initialTrack }: PlayerProps) {
                 <PlayerControls size="large" />
                 <PlayerVolume isSliderHidden />
             </div>
+            <Link href={'visualisation'}>
+                <PiIcon />
+            </Link>
 
             <div className="col-span-2 row-start-2 w-full">
                 <TrackTimeSlider />

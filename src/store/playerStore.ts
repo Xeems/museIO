@@ -26,6 +26,8 @@ type PlayerStoreType = {
 
     bindTrackList: (params: { queue: TrackType[]; queueSource: string }) => void
     clearQueue: () => void
+
+    analyser: AnalyserNode | null
 }
 
 export const usePlayerStore = create<PlayerStoreType>()(
@@ -83,5 +85,7 @@ export const usePlayerStore = create<PlayerStoreType>()(
         },
 
         clearQueue: () => set({ queue: [] }),
+
+        analyser: null,
     })),
 )

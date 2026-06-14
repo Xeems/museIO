@@ -1,5 +1,5 @@
-import PlayerQueue from '@/app/player/PlayerQueue'
-import PagePlayer from '../../../player/PagePlayer'
+import PlayerQueue from '../../player/PlayerQueue'
+import PlayerCard from '../../player/PlayerCard'
 import PlayerDialog from './PlayerDialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -20,7 +20,7 @@ export default function Page() {
 
                 <DesktopWrapper>
                     <div className="flex w-2/5 flex-row items-center">
-                        <PagePlayer />
+                        <PlayerCard />
                     </div>
 
                     <ScrollArea className="flex-1">

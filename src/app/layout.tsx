@@ -29,7 +29,6 @@ export default function RootLayout({
         <html lang="en">
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex flex-col`}>
-                <Header />
                 {children}
                 <GlobalAudio />
             </body>

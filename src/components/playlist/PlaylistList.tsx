@@ -2,6 +2,7 @@ import getUserPlaylists from '@/actions/getUserPlaylists'
 
 import PlaylistCard from './PlaylistCard'
 import { PlaylistType } from '../../../@types/playlist'
+import CreatePlaylistDialog from './CreatePlaylistDialog'
 
 // to-do find a better name for component
 export default async function PlaylistList() {
@@ -11,10 +12,16 @@ export default async function PlaylistList() {
 
     return (
         <div>
-            {Array.isArray(playlists) &&
-                playlists.map((playlist) => (
-                    <PlaylistCard key={playlist.id} playlist={playlist} />
-                ))}
+            <CreatePlaylistDialog />
+
+            <ul>
+                {Array.isArray(playlists) &&
+                    playlists.map((playlist) => (
+                        <li key={playlist.id}>
+                            <PlaylistCard playlist={playlist} />
+                        </li>
+                    ))}
+            </ul>
         </div>
     )
 }

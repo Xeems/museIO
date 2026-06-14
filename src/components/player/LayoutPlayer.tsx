@@ -7,14 +7,23 @@ import PlayerModeToggle from './PlayerModeToggle'
 import PlayerVolume from './PlayerVolume'
 import TrackInfo from './TrackInfo'
 import PlayerControls from './PlayerControls'
-import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
-export default function LayoutPlayer() {
+type Props = {
+    variant?: 'default' | 'visualisation'
+}
+
+export default function LayoutPlayer({ variant = 'default' }: Props) {
     const currentTrack = usePlayerStore((s) => s.currentTrack)
     if (!currentTrack) return
 
     return (
-        <Card className="fixed inset-x-0 bottom-0 flex w-full items-center justify-center rounded-none border-none p-0 md:border-t md:border-solid md:p-3">
+        <Card
+            className={cn(
+                'fixed inset-x-0 bottom-0 flex w-full items-center justify-center rounded-none border-none p-0 md:border-t md:border-solid md:p-3',
+                variant === 'visualisation' &&
+                    'text-primary-foreground bottom-4 mx-auto w-[98%] rounded-md border-solid border-white/30 bg-white/10 backdrop-blur-sm',
+            )}>
             <div className="grid w-full grid-rows-[auto_auto] gap-2 md:flex md:grid-rows-1 md:flex-row md:items-center xl:max-w-[95%]">
                 <div className="row-start-2 flex flex-row justify-between px-2 pb-2 md:pb-0">
                     <TrackInfo track={currentTrack} />
