@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '../ui/button'
 import { Volume2Icon, VolumeXIcon } from 'lucide-react'
 import { Slider } from '../ui/slider'
@@ -13,7 +12,6 @@ export default function PlayerVolume({
     const setVolume = usePlayerStore((s) => s.setVolume)
 
     function handleVolumeChange(value: number[]) {
-        //setIsMuted(false)
         setVolume(value[0])
     }
 
@@ -34,7 +32,7 @@ export default function PlayerVolume({
                     className="w-20"
                     max={1.0}
                     min={0.0}
-                    step={0.05}
+                    step={0.01}
                     value={[volume]}
                     onValueChange={handleVolumeChange}
                 />

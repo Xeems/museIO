@@ -1,18 +1,33 @@
-import React from 'react'
+'use client'
+
 import { Button } from '../ui/button'
-import { useTrackQueue } from '@/hooks/player/useTrackQueue'
 import { Repeat1Icon, RepeatIcon, ShuffleIcon } from 'lucide-react'
 import { usePlayerStore } from '@/store/playerStore'
+import { useShallow } from 'zustand/shallow'
 
 export default function PlayerModeToggle() {
-    const audioRef = usePlayerStore((s) => s.audioRef)
-    const { togglePlayMode, playMode } = useTrackQueue(audioRef)
+    const { queuePlayMode, setQueuePlayMode } = usePlayerStore(
+        useShallow((s) => ({
+            queuePlayMode: s.queuePlayMode,
+            setQueuePlayMode: s.setQueuePlayMode,
+        })),
+    )
+
+    function togglePlayMode() {
+        const mode =
+            queuePlayMode === 'queue'
+                ? 'random'
+                : queuePlayMode === 'random'
+                  ? 'loop'
+                  : 'queue'
+        setQueuePlayMode(mode)
+    }
 
     return (
         <Button variant={'ghost'} onClick={togglePlayMode} className="!p-2">
-            {playMode === 'queue' && <RepeatIcon className="size-5" />}
-            {playMode === 'random' && <ShuffleIcon className="size-5" />}
-            {playMode === 'loop' && <Repeat1Icon className="size-5" />}
+            {queuePlayMode === 'queue' && <RepeatIcon className="size-5" />}
+            {queuePlayMode === 'random' && <ShuffleIcon className="size-5" />}
+            {queuePlayMode === 'loop' && <Repeat1Icon className="size-5" />}
         </Button>
     )
 }

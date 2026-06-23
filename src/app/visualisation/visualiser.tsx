@@ -13,7 +13,7 @@ export default function Visualiser() {
     const pointsRef = useRef<THREE.Points>(null)
 
     const baseSphereRadius = 18
-    const totalPoints = 8000
+    const totalPoints = 2000
 
     // Алгоритм Фибоначчи для сферы равноудаленных точек
     const [positions, initialDirections] = useMemo(() => {
@@ -132,36 +132,27 @@ export default function Visualiser() {
             vertex.copy(direction).multiplyScalar(displacement)
             positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z)
 
-            // В тишине — блеклый белый (0.28)
             const defaultBrightness = 0.28
             let r = defaultBrightness
             let g = defaultBrightness
             let b = defaultBrightness
 
             if (audioValue > 0.04) {
-                // ЛОГИКА ГРАДИЕНТА:
-                // Вычисляем фактор высоты (heightFactor) конкретной точки внутри волны.
-                // Он равен 0 у основания (в низине рельефа) и стремится к 1 на самой вершине пика.
                 const heightFactor = Math.max(
                     0,
                     Math.min(1, (noiseValue + 1.0) * 0.3 + audioValue * 0.4),
                 )
 
-                // Градиент для средних/высоких частот (основное тело сферы)
-                // Основание волны (heightFactor -> 0): Глубокий неоново-синий
-                // Вершина волны (heightFactor -> 1): Ослепительный бирюзово-зеленый
-                let startHue = 0.65 // Синий
-                let endHue = 0.45 // Бирюзово-зеленый
+                let startHue = 0.65
+                let endHue = 0.45
 
                 // Плавно интерполируем оттенок от основания к вершине
                 let hue = THREE.MathUtils.lerp(startHue, endHue, heightFactor)
                 let lightness = 0.3 + heightFactor * 0.3
 
-                // Отдельный градиент для басовых взрывов на экваторе
-                // Если играет тяжелый бас, то у основания волна будет фиолетовой, а на самом пике — ярко-розовой
                 if (positionFactor < 0.35 && bassTrigger > 0.2) {
-                    startHue = 0.76 // Фиолетовый (основание)
-                    endHue = 0.92 // Ярко-розовый (вершина)
+                    startHue = 0.76
+                    endHue = 0.92
                     hue = THREE.MathUtils.lerp(startHue, endHue, heightFactor)
                     lightness = 0.35 + heightFactor * 0.4
                 }
@@ -194,7 +185,7 @@ export default function Visualiser() {
                 <pointsMaterial
                     size={0.18}
                     sizeAttenuation={true}
-                    //transparent={true}
+                    transparent={true}
                     opacity={0.9}
                     vertexColors={true}
                     map={sharpCircleTexture}

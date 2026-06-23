@@ -20,9 +20,10 @@ export default function LayoutPlayer({ variant = 'default' }: Props) {
     return (
         <Card
             className={cn(
-                'fixed inset-x-0 bottom-0 flex w-full items-center justify-center rounded-none border-none p-0 md:border-t md:border-solid md:p-3',
+                'fixed inset-x-0 bottom-0 flex items-center justify-center rounded-none border-none p-0 md:border-t md:border-solid md:p-3',
+                variant === 'default' && 'w-full',
                 variant === 'visualisation' &&
-                    'text-primary-foreground bottom-4 mx-auto w-[98%] rounded-md border-solid border-white/30 bg-white/10 backdrop-blur-sm',
+                    'text-primary-foreground bottom-4 mx-auto w-[98%] rounded-md border-solid border-white/10 bg-white/5 backdrop-blur-xs',
             )}>
             <div className="grid w-full grid-rows-[auto_auto] gap-2 md:flex md:grid-rows-1 md:flex-row md:items-center xl:max-w-[95%]">
                 <div className="row-start-2 flex flex-row justify-between px-2 pb-2 md:pb-0">

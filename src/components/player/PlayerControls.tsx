@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '../ui/button'
 import {
     PauseIcon,
@@ -6,7 +5,6 @@ import {
     SkipBackIcon,
     SkipForwardIcon,
 } from 'lucide-react'
-import { useTrackQueue } from '@/hooks/player/useTrackQueue'
 import { usePlayerStore } from '@/store/playerStore'
 import { useShallow } from 'zustand/shallow'
 
@@ -28,15 +26,16 @@ const sizeClasses = {
 export default function PlayerControls({
     size = 'medium',
 }: PlayerControlsProps) {
-    const { audioRef, togglePlay, isPlaying } = usePlayerStore(
+    const { togglePlay, isPlaying, playNext, playPrev } = usePlayerStore(
         useShallow((s) => ({
             audioRef: s.audioRef,
             togglePlay: s.togglePlay,
             isPlaying: s.isPlaying,
+            playNext: s.playNext,
+            playPrev: s.playPrev,
         })),
     )
 
-    const { playNext, playPrev } = useTrackQueue(audioRef)
     const classes = sizeClasses[size]
 
     return (
