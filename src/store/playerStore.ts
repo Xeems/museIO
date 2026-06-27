@@ -64,7 +64,6 @@ export const usePlayerStore = create<PlayerStoreType>()(
 
             set({
                 currentTrack: track,
-                isPlaying: true,
                 queue: exists ? queue : [track], // if no queue, create one with initial track
             })
         },
@@ -85,8 +84,6 @@ export const usePlayerStore = create<PlayerStoreType>()(
             } else {
                 audioRef.current.play().catch(() => {})
             }
-
-            set({ isPlaying: !isPlaying })
         },
 
         bindTrackList: ({ queue, queueSource }) => {
@@ -125,7 +122,11 @@ export const usePlayerStore = create<PlayerStoreType>()(
             const targetIndex = (index + queue.length) % queue.length
             const nextTrack = queue[targetIndex]
 
-            set({ currentTrack: nextTrack, isPlaying: true })
+            set({
+                currentTrack: nextTrack,
+                currentTrackTime: 0,
+                currentTrackBufferedPercent: 0,
+            })
         },
 
         playNext: () => {
@@ -144,7 +145,6 @@ export const usePlayerStore = create<PlayerStoreType>()(
             const { currentTrack, queue, playTrackByIndex, audioRef } = get()
             if (!currentTrack || queue.length === 0) return
 
-            // Фича плееров: если трек играет больше 3 секунд, Назад просто мотает в начало
             if (audioRef?.current && audioRef.current.currentTime > 3) {
                 audioRef.current.currentTime = 0
                 set({ currentTrackTime: 0 })
@@ -175,7 +175,6 @@ export const usePlayerStore = create<PlayerStoreType>()(
                         audioRef.current.currentTime = 0
                         audioRef.current.play().catch(() => {})
                     }
-                    set({ currentTrackTime: 0, isPlaying: true })
                     break
 
                 case 'queue':

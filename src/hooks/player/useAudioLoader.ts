@@ -1,6 +1,7 @@
 import { RefObject, useEffect, useState } from 'react'
 import Hls from 'hls.js'
 import { TrackType } from '../../../@types/track'
+import { usePlayerStore } from '@/store/playerStore'
 
 export function useAudioLoader(
     currentTrack: TrackType | null,
@@ -17,6 +18,15 @@ export function useAudioLoader(
 
         hls.loadSource(`/api/hls/${currentTrack.trackDir}/index.m3u8`)
         hls.attachMedia(audio)
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            const { queue } = usePlayerStore.getState()
+            if (queue.length > 0) {
+                audio.play().catch((err) => {
+                    console.warn('Автоплей заблокирован браузером:', err)
+                })
+            }
+        })
 
         const updateBuffer = () => {
             try {

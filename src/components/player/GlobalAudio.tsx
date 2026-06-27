@@ -6,24 +6,62 @@ import { useShallow } from 'zustand/shallow'
 
 export default function GlobalAudio() {
     const audioRef = useRef<HTMLAudioElement>(null)
+    const audioCtxRef = useRef<AudioContext | null>(null)
 
-    const { track, setAudioRef, handleEnded } = usePlayerStore(
-        useShallow((s) => ({
-            track: s.currentTrack,
-            setAudioRef: s.setAudioRef,
-            handleEnded: s.handleTrackEnded,
-        })),
-    )
+    const { track, setAudioRef, handleEnded, playNext, playPrev } =
+        usePlayerStore(
+            useShallow((s) => ({
+                track: s.currentTrack,
+                setAudioRef: s.setAudioRef,
+                handleEnded: s.handleTrackEnded,
+                isPlaying: s.isPlaying,
+                playNext: s.playNext,
+                playPrev: s.playPrev,
+            })),
+        )
 
     const { bufferedPercent } = useAudioLoader(track, audioRef)
 
-    const isConnected = useRef(false)
-
     useLayoutEffect(() => {
+        if (audioRef.current) {
+            setAudioRef(audioRef as RefObject<HTMLAudioElement>)
+        }
+    })
+
+    // Audio AnalyserNode for visualisation
+    useEffect(() => {
         const audio = audioRef.current
         if (!audio) return
-        setAudioRef(audioRef as RefObject<HTMLAudioElement>)
-    })
+
+        const AudioContextClass =
+            window.AudioContext || (window as any).webkitAudioContext
+        const audioCtx = new AudioContextClass()
+        audioCtxRef.current = audioCtx
+
+        const source = audioCtx.createMediaElementSource(audio)
+        const audioAnalyser = audioCtx.createAnalyser()
+        audioAnalyser.fftSize = 2048
+        audioAnalyser.smoothingTimeConstant = 0.65
+
+        const gainNode = audioCtx.createGain()
+
+        source.connect(audioAnalyser)
+        source.connect(gainNode)
+        gainNode.connect(audioCtx.destination)
+
+        gainNode.gain.setValueAtTime(
+            usePlayerStore.getState().volume,
+            audioCtx.currentTime,
+        )
+
+        usePlayerStore.setState({ analyser: audioAnalyser, gainNode: gainNode })
+
+        return () => {
+            if (audioCtx.state !== 'closed') {
+                audioCtx.close()
+            }
+        }
+    }, [])
 
     useEffect(() => {
         usePlayerStore.setState({
@@ -31,39 +69,62 @@ export default function GlobalAudio() {
         })
     }, [bufferedPercent])
 
+    useEffect(() => {
+        if (!track || !('mediaSession' in navigator)) return
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.name,
+            artist: track.author || 'Unknown Artist',
+            album: '',
+            artwork: track.imageName
+                ? [
+                      {
+                          src: `/api/images/${track.imageName}`,
+                          sizes: '512x512',
+                          type: 'image/png',
+                      },
+                  ]
+                : [],
+        })
+
+        navigator.mediaSession.setActionHandler('play', () =>
+            audioRef.current?.play(),
+        )
+        navigator.mediaSession.setActionHandler('pause', () =>
+            audioRef.current?.pause(),
+        )
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            playPrev()
+        })
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            playNext()
+        })
+    }, [track])
+
     const handleTimeUpdate = () => {
         const audio = audioRef.current
         if (!audio) return
         usePlayerStore.setState({ currentTrackTime: audio.currentTime })
     }
 
-    //create AnalyserNode and saves it in store for visualisation
-    const handleAudioInit = () => {
-        if (isConnected.current || !audioRef.current) return
+    async function handlePlay() {
+        usePlayerStore.setState({ isPlaying: true })
 
-        const AudioContextClass = window.AudioContext
-        const audioCtx = new AudioContextClass()
+        if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+            await audioCtxRef.current.resume()
+        }
+    }
 
-        const source = audioCtx.createMediaElementSource(audioRef.current)
-        const audioAnalyser = audioCtx.createAnalyser()
-        audioAnalyser.fftSize = 512
-        audioAnalyser.smoothingTimeConstant = 0.05
-
-        const gainNode = audioCtx.createGain()
-
-        source.connect(audioAnalyser)
-        source.connect(gainNode)
-
-        gainNode.connect(audioCtx.destination)
-
-        usePlayerStore.setState({ analyser: audioAnalyser, gainNode: gainNode })
-        isConnected.current = true
+    function handlePause() {
+        usePlayerStore.setState({ isPlaying: false })
     }
 
     return (
         <audio
             ref={audioRef}
-            onPlay={handleAudioInit}
+            onPlay={handlePlay}
+            onPause={handlePause}
             crossOrigin="anonymous"
             onEnded={handleEnded}
             onTimeUpdate={handleTimeUpdate}
